@@ -1,0 +1,15 @@
+#!/bin/zsh
+set -euo pipefail
+support='/Library/Application Support/OMEN Control'
+"$support/Tools/omen-installer" install
+user=$(/usr/bin/stat -f '%Su' /dev/console)
+user_id=$(/usr/bin/stat -f '%u' /dev/console)
+if [[ "$user_id" -lt 501 || "$user" == root || "$user" == loginwindow ]]; then
+    print 'No desktop user: app and driver installed. Open Settings after reboot to enable quiet login.'
+    exit 0
+fi
+# Run user-preference and login-agent operations as the console user, never root.
+if ! /usr/bin/sudo -H -u "$user" /bin/zsh "$support/Tools/configure-login.sh"; then
+    print 'App and EFI driver installed; login setup failed. Enable the service in Settings after reboot.'
+fi
+print 'Installation complete. Restart to load OmenFanBridge 0.4.0.'

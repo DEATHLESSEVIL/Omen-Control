@@ -1,0 +1,1 @@
+module SMCReader { header "SMCReader.h" export * }

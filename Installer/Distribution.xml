@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+  <title>Omen Control Alpha 1.0V — Experimental 8C78</title>
+  <welcome file="Welcome.html" mime-type="text/html"/>
+  <readme file="ReadMe.html" mime-type="text/html"/>
+  <license file="License.txt"/>
+  <conclusion file="Conclusion.html" mime-type="text/html"/>
+  <options customize="never" require-scripts="true" hostArchitectures="x86_64"/>
+  <domains enable_anywhere="false" enable_currentUserHome="false" enable_localSystem="true"/>
+  <choices-outline><line choice="default"/></choices-outline>
+  <choice id="default" title="App, fan bridge and documentation" visible="false"><pkg-ref id="local.omen.control.package"/></choice>
+  <pkg-ref id="local.omen.control.package" version="@VERSION@" onConclusion="RequireRestart">omen-component.pkg</pkg-ref>
+</installer-gui-script>

@@ -1,0 +1,10 @@
+#!/bin/zsh
+set -euo pipefail
+[[ "${3:-/}" == / ]] || { print -u2 'Install only onto the running startup volume.'; exit 1; }
+script_dir="${0:A:h}"
+"$script_dir/omen-installer" prepare "$script_dir/ocvalidate"
+# Prevent replacing a running controller. Quitting releases its lease to Auto.
+if /usr/bin/pgrep -x OmenControl >/dev/null; then
+    print -u2 'Quit OMEN Control using its menu, then run the installer again. Your verified EFI backup has been kept.'
+    exit 1
+fi

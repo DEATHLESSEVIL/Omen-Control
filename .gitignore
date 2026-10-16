@@ -1,0 +1,17 @@
+.build/
+.swiftpm/
+DerivedData/
+dist/
+Driver/build/
+Driver/__pycache__/
+backups/
+probe-reports/
+*.xcuserstate
+xcuserdata/
+*-install-record.json
+Driver/config*.plist
+*.zip
+.DS_Store
+
+
+Resources/LocalFanArtwork/

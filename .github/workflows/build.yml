@@ -1,0 +1,21 @@
+name: Build and policy checks
+on: [push, pull_request]
+jobs:
+  macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Profile and interpolation checks
+        run: swift run --disable-sandbox OmenCoreChecks
+      - name: Firmware boundary checks
+        run: |
+          xcrun clang++ -std=c++17 Driver/test-fan-policy.cpp -o /tmp/omen-policy-checks
+          /tmp/omen-policy-checks
+      - name: Build Intel app
+        run: ./build-app.sh
+      - name: Verify signature
+        run: codesign --verify --deep --strict dist/OmenControl.app
+      - name: Installer fixture checks
+        run: |
+          xcrun swiftc -O -framework IOKit Installer/Tools/main.swift -o /tmp/omen-installer-check
+          /tmp/omen-installer-check --self-test
