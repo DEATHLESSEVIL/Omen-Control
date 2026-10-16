@@ -4,6 +4,8 @@
 
 # Omen Control Alpha 1.0V
 
+![Omen Control Alpha 1.0V dashboard](https://github.com/user-attachments/assets/83647065-42a2-4d77-81c3-d30f1d7d6d67)
+
 Native Intel macOS fan control for the tested **HP OMEN 16-wf1xxx / board 8C78 / BIOS F.15**. Original app, driver and tools are MIT licensed. This community project is not an HP product.
 
 [Installation](INSTALLATION.md) · [Limitations and risks](Docs/LIMITATIONS.md) · [Release notes](Docs/RELEASE-NOTES.md) · [Power helper](Docs/POWER-HELPER.md) · [License](LICENSE)
