@@ -10,7 +10,30 @@ Native Intel macOS fan control for the tested **HP OMEN 16-wf1xxx / board 8C78 /
 
 [Installation](INSTALLATION.md) · [Limitations and risks](Docs/LIMITATIONS.md) · [Release notes](Docs/RELEASE-NOTES.md) · [Power helper](Docs/POWER-HELPER.md) · [License](LICENSE)
 
-## What it does
+> **Alpha release · tested on one laptop.** Compatibility is limited to the HP OMEN 16-wf1xxx, board 8C78, BIOS F.15. Other OMEN models are not confirmed.
+>
+> **Before installing:** the experimental PKG changes the supported mounted boot EFI. Keep a working EFI backup and recovery USB. The PKG is unsigned and not notarized.
+
+## Start here
+
+1. Check the tested laptop above and read [Installation](INSTALLATION.md) and [Limitations and risks](Docs/LIMITATIONS.md).
+2. Get the installer or app from [Releases](https://github.com/DEATHLESSEVIL/Omen-Control/releases). The app needs the compatible fan bridge driver; copying the app alone does not install it.
+3. Open the app, choose a fan profile and select **Apply**. Start with **Auto** if you are unsure.
+
+Click a **More info** row below to expand the details.
+
+## At a glance
+
+| Feature | What you get |
+| --- | --- |
+| Cooling | Separate CPU and GPU fan controls and live speed readings |
+| Temperatures | CPU/GPU cards with expandable sensor details |
+| Menu bar | Quick fan sliders without keeping the main window open |
+| Power Profile | Separate battery and plugged-in preferences |
+| Settings | Temperature units, appearance, Dock icon and background service |
+
+<details>
+<summary><strong>More info — all features</strong></summary>
 
 - Independent CPU/GPU fan readback and manual requests, animated fan illustrations, one-minute RPM history, expandable temperature cards.
 - Auto, Eco (30%), Manual, Performance (full), and temperature-curve profiles.
@@ -18,19 +41,57 @@ Native Intel macOS fan control for the tested **HP OMEN 16-wf1xxx / board 8C78 /
 - Settings for °C/°F, Dock visibility while windows are open, background fan service, and power-helper approval.
 - **Power Profile** separates local battery/AC fan preferences from macOS Low Power Mode.
 
-## Fan control
+</details>
+
+## Choose a fan profile
+
+| Profile | What it does |
+| --- | --- |
+| Auto | Lets the laptop firmware manage cooling |
+| Eco · 30% | Requests a lower fan speed, subject to firmware minimums |
+| Manual | Lets you request a separate percentage for each fan |
+| Performance · Full | Requests maximum fan speed; does not raise CPU/GPU power limits |
+| Temperature curve | Adjusts cooling using the hotter CPU/GPU sensor; both sensors are required |
+
+**0% returns that fan to Auto. It cannot stop the fans on this BIOS.**
+
+Speed is measured in RPM (revolutions per minute). The tested range is **CPU 2,000–6,000 RPM** and **GPU 2,300–6,300 RPM**, reported in 100 RPM steps. **Apply** stays disabled after an accepted request until you change a relevant setting.
+
+<details>
+<summary><strong>More info — manual speeds and Apply</strong></summary>
 
 Auto returns cooling to firmware control. Manual requests 0–100% for each fan; 1–100% scales that fan's own maximum and clamps to its minimum. **0% means Auto, not fan stop.** This BIOS cannot stop the fans through the tested method. Performance requests full fans; it does not change CPU/GPU power limits.
 
 The tested firmware table is CPU 2000–6000 RPM and GPU 2300–6300 RPM. Readback is in 100-RPM steps and can differ from a target while settling. Apply is disabled after an accepted request until a relevant setting changes.
 
+</details>
+<details>
+<summary><strong>More info — fan animation and hardware images</strong></summary>
+
 Both animated rotors use optional bundled layers, with a built-in Core Graphics fallback. They rotate independently from measured RPM, at 1/240 speed for visibility. Stationary housing and rotating blades are composited into each frame; speed changes retain phase. Reduce Motion freezes the animation. Missing RPM stops it. CPU and GPU temperature cards show detected hardware names and matching icons when supplied. GPU artwork follows the detected PCI vendor, with a small transparent NVIDIA logo for NVIDIA hardware. Optional local artwork in `Resources/LocalFanArtwork` is omitted from the public source export and public installer; source-only builds use the fallback.
+
+</details>
+<details>
+<summary><strong>More info — temperature sensors and curves</strong></summary>
 
 Curves follow the hotter CPU/GPU temperature and need both sensors. Missing/stale temperature data exits or disables curve control. CPU firmware temperature is not used as a substitute for GPU temperature. GPU readings use SMC when exposed, otherwise a nonblocking read-only NVIDIA RM thermal query through the installed graphics driver. That fallback is not confirmed for every driver.
 
+</details>
+<details>
+<summary><strong>More info — automatic fallback and thermal limits</strong></summary>
+
 The driver has a 20-second lease; the app sends a heartbeat every three seconds. Disconnect, expiry, sleep/shutdown and selected telemetry faults request firmware Auto. CPU firmware temperature at 90°C requests Auto; the app also boosts manual cooling under serious/critical thermal conditions. These are fallbacks, not a guarantee against every hardware/firmware fault.
 
-## Power Profile
+</details>
+
+## Battery and plugged-in settings
+
+Use **Power Profile** to choose fan preferences for each power source. Enable source following to switch automatically when you plug in or unplug.
+
+Fan preferences do not need an administrator password. macOS **Low Power Mode** needs separate power-helper approval in **Settings → Enable power access…**. Once approved, ordinary changes do not run a password script each time. macOS may ask again if approval or the app identity changes.
+
+<details>
+<summary><strong>More info — Power Profile, approval and unavailable settings</strong></summary>
 
 The panel reads current settings with `pmset -g custom`, including when the app returns to the foreground. It preserves drafts if the live system changes. Apply stays disabled until an effective request differs from the current policy or accepted local fan preferences. Reverting an edit disables it again.
 
@@ -40,19 +101,76 @@ Low Power Mode is a protected macOS setting. Open Settings → **Enable power ac
 
 Approval is handled by macOS and may require an administrator once, and again if the service is revoked or its signed identity changes. The helper must be in the complete `/Applications/OmenControl.app` bundle. Local ad-hoc builds are not equivalent to Developer-ID-signed distribution; service approval still needs a live desktop test on the target machine. See [Power helper](Docs/POWER-HELPER.md).
 
-## Background service and Dock
+</details>
+
+## Menu bar, login and appearance
+
+- Closing the window keeps fan control running in the menu bar.
+- Enable the background service to start quietly at login.
+- Turn the service off to release this app’s manual fan control back to Auto and stop its monitoring and OMEN-key handling. This does not unload the driver.
+- Settings controls °C/°F, Dock visibility and **Chip Image / Product Image**.
+- Overview contains the fan controls; the button below Settings switches between Cooling and Power Profile.
+
+<details>
+<summary><strong>More info — background service and Dock behaviour</strong></summary>
 
 The menu-bar controller starts quietly at login when enabled. Closing its windows leaves fan control running. The Dock icon appears only while a dashboard or Settings window is open, if that setting is enabled.
 
 Turning the background fan service off requests Auto for this app's manual lease, closes the client, stops polling and OMEN-key handling, and disables quiet login. Settings remains accessible. This switch does not unload the kernel extension. Power access is a separate macOS-managed helper and can be disabled in Settings.
 
-## Efficiency
+</details>
+<details>
+<summary><strong>More info — monitoring frequency and efficiency</strong></summary>
 
 Hardware/fan monitoring runs every three seconds; the OMEN key is polled every 350 ms. GPU thermal queries are separate, at most every five seconds when SMC does not expose the GPU. Fan views draw at up to 60 FPS while visible; closing the dashboard stops their animation timers. Power policy is read on activation and when needed for changes, not every heartbeat. The privileged helper launches on demand and has no polling loop.
 
 CPU use, memory use and battery overhead have not been benchmarked on hardware. No percentage or battery-life claim is made.
 
-## Open and build in Xcode
+</details>
+
+## Downloads and installation details
+
+| File | Use it for |
+| --- | --- |
+| Intel app ZIP | The application; compatible bridge driver must already be installed |
+| Experimental PKG | Combined installation on the supported configuration; requires administrator access, mounted boot EFI and restart |
+| Source ZIP | Source code and native Xcode project |
+| SHA-256 hashes | Checking that downloaded files match the published release |
+
+**The power helper needs separate approval after installation.** Read [Installation](INSTALLATION.md) before running the PKG.
+
+<details>
+<summary><strong>More info — release contents and window behaviour</strong></summary>
+
+The release includes an Intel app ZIP, combined experimental PKG, source ZIP with the native Xcode project, README, limitations, release notes and SHA-256 hashes. The PKG is unsigned and not notarized. Building it does not install it or change the running machine’s EFI. Installation requires administrator authentication, a mounted supported boot EFI and a restart. The app starts quietly at login; power-helper approval is a separate explicit step in Settings.
+
+The window uses native point-size typography with AppKit-owned bounds. Overview and Power Profile share stable window bounds. Navigation and profile edits do not resize the window. The host does not resize the window from SwiftUI intrinsic content estimates, and window size is capped to the screen’s usable bounds.
+
+</details>
+<details>
+<summary><strong>More info — private local artwork builds</strong></summary>
+
+`Scripts/build-release.py --validator /path/to/ocvalidate --local-artwork` creates `dist/LocalRelease` and a Local-All-Files ZIP with the optional local artwork preserved. These private copies are outside the original-code MIT grant; do not treat them as redistribution-ready. The public `dist/Release` installer and allowlisted source export omit local artwork and use the built-in fallback. Both variants include the same app code, power helper and bridge.
+
+</details>
+
+## Help and diagnostics
+
+Open **Diagnostics** in the dashboard for sensor or driver errors. Before sharing a report, remove serial numbers, private EFI configurations and other personal hardware details.
+
+<details>
+<summary><strong>More info — safe sharing and source exports</strong></summary>
+
+Use Diagnostics in the dashboard for sensor/driver errors. Keep personal hardware dumps, EFI configs, serials, backups and install records private. The exported source ZIP is allowlisted; do not upload the whole private workspace. The native Xcode project and README are included in the ZIP. See Docs/GITHUB-RELEASE.md for publishing later.
+
+</details>
+
+## For developers
+
+Open **OmenControl.xcodeproj** in Xcode. Quit the installed app first: only one instance can own fan control. Building the app does not install the kernel driver.
+
+<details>
+<summary><strong>More info — Xcode, command-line builds and checks</strong></summary>
 
 Open `OmenControl.xcodeproj`, select OmenControl → My Mac, then Run. Quit the installed app first because only one instance may own the fan lease. The project includes the helper sources and builds/embeds its executable and launch-daemon plist automatically. Debug builds can exercise the UI; helper registration requires the full app installed in Applications. The app targets Intel macOS 13+ without App Sandbox for its allowlisted IOKit clients.
 
@@ -69,7 +187,9 @@ xcrun clang++ -std=c++17 Driver/test-fan-policy.cpp -o /tmp/omen-policy-checks
 
 The separate bridge source/build script targets the tested Intel machine and macOS 26.5 SDK. See Driver/PROTOCOL.md and INSTALLATION.md before touching EFI. The 1.0 experimental PKG is built separately using `Scripts/build-release.py --validator /path/to/ocvalidate`. Read INSTALLATION.md before running it; the installer modifies the mounted boot EFI only on the supported configuration.
 
-## Source layout
+</details>
+<details>
+<summary><strong>More info — source folders</strong></summary>
 
 - `Sources/OmenControl`: SwiftUI/AppKit UI, telemetry, fan client, power settings/client and fan renderer.
 - `Sources/OmenCore`: request validation, interpolation, animation phase and power-policy parsing.
@@ -81,24 +201,18 @@ The separate bridge source/build script targets the tested Intel machine and mac
 - `Installer`: separately documented experimental EFI installer sources; included in the combined 1.0 PKG.
 - `Scripts`: app build, source export, project generation and release tooling.
 
-## Diagnostics and sharing
+</details>
 
-Use Diagnostics in the dashboard for sensor/driver errors. Keep personal hardware dumps, EFI configs, serials, backups and install records private. The exported source ZIP is allowlisted; do not upload the whole private workspace. The native Xcode project and README are included in the ZIP. See Docs/GITHUB-RELEASE.md for publishing later.
+## License and credits
 
-## Licenses and references
+Original app, driver and tools use the **MIT license**. This is a community project, not an HP product. Keep the license and third-party notices when redistributing.
+
+<details>
+<summary><strong>More info — licensing, trademarks and protocol references</strong></summary>
 
 Original code is MIT; retain LICENSE and THIRD-PARTY-NOTICES.md. NVIDIA thermal ABI notices, the separate OpenCore validator BSD notice and HP/OMEN logo attribution remain intact. MIT does not grant trademark rights. No graphics, audio, Wi-Fi or personal EFI files are bundled in the source handoff.
 
 Protocol references: [Linux hp-wmi](https://github.com/torvalds/linux/blob/master/drivers/platform/x86/hp/hp-wmi.c), [OmenMon](https://github.com/OmenMon/OmenMon), and investigation of the tested machine's ACPI. The implementation is board-specific; the firmware protocol does not depend on macOS.
 
-The default Overview includes fan controls. Power Profile remains a separate page without scrolling. Settings → Appearance offers Chip Image or Product Image. The button below Settings switches between Cooling and Power Profile.
+</details>
 
-## Release files
-
-The release includes an Intel app ZIP, combined experimental PKG, source ZIP with the native Xcode project, README, limitations, release notes and SHA-256 hashes. The PKG is unsigned and not notarized. Building it does not install it or change the running machine’s EFI. Installation requires administrator authentication, a mounted supported boot EFI and a restart. The app starts quietly at login; power-helper approval is a separate explicit step in Settings.
-
-The window uses native point-size typography with AppKit-owned bounds. Overview and Power Profile share stable window bounds. Navigation and profile edits do not resize the window. The host does not resize the window from SwiftUI intrinsic content estimates, and window size is capped to the screen’s usable bounds.
-
-### Local artwork installer
-
-`Scripts/build-release.py --validator /path/to/ocvalidate --local-artwork` creates `dist/LocalRelease` and a Local-All-Files ZIP with the optional local artwork preserved. These private copies are outside the original-code MIT grant; do not treat them as redistribution-ready. The public `dist/Release` installer and allowlisted source export omit local artwork and use the built-in fallback. Both variants include the same app code, power helper and bridge.
