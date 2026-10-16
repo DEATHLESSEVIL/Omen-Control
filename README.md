@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Resources/Branding/omen-readme-logo.png" alt="OMEN logo" width="160">
+</p>
+
 # Omen Control Alpha 1.0V
 
 Native Intel macOS fan control for the tested **HP OMEN 16-wf1xxx / board 8C78 / BIOS F.15**. Original app, driver and tools are MIT licensed. This community project is not an HP product.
